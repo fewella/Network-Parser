@@ -35,7 +35,7 @@ int main() {
 	}
 
 	struct bpf_program fp;		/* The compiled filter */
-	char filter_exp[] = "port 10";	/* The filter expression */
+	char filter_exp[] = "greater 0";	/* https://www.tcpdump.org/manpages/pcap-filter.7.html */
 	bpf_u_int32 mask;		/* Our netmask */
 	bpf_u_int32 net;		/* Our IP */
 	struct pcap_pkthdr header;	/* The header that pcap gives us */
