@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pcap.h>
-
+#include <time.h>
 #define ERR_BUF_SIZE 2048
 
 /**
@@ -13,6 +13,7 @@
 
 int main() {
 	char* dev, errbuf[ERR_BUF_SIZE];
+	int packet_delay_ms = 1;
 
 	dev = pcap_lookupdev(errbuf);
 	if (dev == NULL) {
@@ -21,7 +22,7 @@ int main() {
 	}
 	printf("Device: %s\n", dev);
 
-	pcap_t* handle = pcap_open_live(dev, BUFSIZ /* Defined in <pcap.h> */, 1, 1000, errbuf);
+	pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, packet_delay_ms, errbuf);
 
 	if (handle == NULL) {
 		fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
@@ -50,10 +51,18 @@ int main() {
 		return(2);
 	}
 	/* Grab a packet */
+	time_t start = time(NULL);
+	size_t size = 0;
 	while (1) {
 		packet = pcap_next(handle, &header);
-		/* Print its length */
-		printf("Jacked a packet with length of [%d]\n", header.len);
+		size += header.len;
+		// flush to stdout every second
+		time_t curr = time(NULL);
+		if ((size_t)(curr - start) >= 1) {
+			printf("Traffic size: [%zu]\n", size);
+			start = curr;
+			size = 0;
+		}
 	}
 	/* And close the session */
 	pcap_close(handle);
