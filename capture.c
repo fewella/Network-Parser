@@ -12,7 +12,6 @@
  */
 
 int main() {
-
 	char* dev, errbuf[ERR_BUF_SIZE];
 
 	dev = pcap_lookupdev(errbuf);
