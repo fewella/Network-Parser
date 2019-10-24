@@ -1,7 +1,107 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <pcap.h>
 #include <netinet/in.h>
 #include <net/ethernet.h>
+#include <ctype.h>
+#include <pthread.h>
+#include <limits.h>
+#include <stdbool.h>
+
+#define NUM_BYTES_PREDICTED 1024
+#define RESIZE_THRESHOLD (UINT_MAX / 255)
+
+static pcap_t* handle;
+
+struct _list_entry {
+	unsigned char value;
+	unsigned int occurences;
+	struct _list_entry* next;
+};
+
+typedef struct _list_entry list_entry;
+
+struct _idx_info {
+	list_entry* lists[NUM_BYTES_PREDICTED];
+	unsigned int total_chars_counted[NUM_BYTES_PREDICTED];
+	unsigned char num_chars[NUM_BYTES_PREDICTED];
+};
+
+typedef struct _idx_info idx_info;
+
+
+static idx_info charData;
+
+void setColor(float value) {
+	if (value >= 0.25) {
+		printf("\033[0;32m");
+	}	
+}
+
+
+void resetColors() {
+	printf("\033[0m");
+}
+
+void append_value(list_entry** entry, unsigned char c) {	
+	*entry = malloc(sizeof(list_entry));
+	**entry = (list_entry) { c, 1, NULL };
+}
+
+void thanosRow(int idx) {
+	list_entry** entry = &charData.lists[idx];
+	while (*entry != NULL) {
+		(*entry)->occurences /= 2;
+		if ((*entry)->occurences == 0) {
+			list_entry* temp = *entry;
+			*entry = (*entry)->next;
+			free(temp);
+		} else {
+			*entry = (*entry)->next;
+		}
+	}
+}
+
+float run_char_analysis(unsigned char c, int idx) {
+	if (idx < 0 || idx >= NUM_BYTES_PREDICTED) return 0;
+	list_entry** entry = &charData.lists[idx];
+	if (*entry == NULL) {
+		append_value(entry, c);
+		unsigned int total_sum = ++charData.total_chars_counted[idx];
+		unsigned int total_unique = ++charData.num_chars[idx];
+		float ret_value = ((float) total_unique) / ((float) total_sum);
+		if (total_sum == RESIZE_THRESHOLD) {
+			thanosRow(idx);
+		}
+		return ret_value;
+	}
+	bool exists = 0;
+	while (*entry != NULL) {
+		if ((*entry)->value == c) {
+			exists = 1;
+			(*entry)->occurences++;
+			break;
+		}
+		entry = &(*entry)->next;
+	}
+
+	unsigned int total_sum, total_unique;
+	total_sum = ++charData.total_chars_counted[idx];
+	
+	if (exists == 0) {
+		append_value(entry, c);
+		total_unique = ++charData.num_chars[idx];
+	} else {
+		total_unique = charData.num_chars[idx];
+	}
+	
+	float ret_value = ((float) total_unique * (*entry)->occurences) / ((float) total_sum);
+	if (total_sum == RESIZE_THRESHOLD) {
+		thanosRow(idx);
+	}
+	return ret_value;
+
+}
 
 /* This function can be used as a callback for pcap_loop() */
 void another_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
@@ -14,25 +114,42 @@ void another_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
     for(i=0;i<pkthdr->len;i++) { 
-        if(isprint(packet[i]))                /* Check if the packet data is printable */
+        float value = run_char_analysis(packet[i], i);
+		setColor(value);
+		if(isprint(packet[i]))                /* Check if the packet data is printable */
             printf("%c",packet[i]);          /* Print it */
         else
-            printf(".",packet[i]);          /* If not print a . */
+            printf(".");          /* If not print a . */
         if((i%16==0 && i!=0) || i==pkthdr->len-1) 
             printf("\n"); 
+		resetColors();
     }
 }
 
+void send_exit_signal(int signal) {
+	printf("Sending Exit Signal...\n");
+	pcap_breakloop(handle);
+}
+
 int main(int argc, char **argv) {
-    pcap_t *handle;
+	int i;
+	for(i = 0; i < NUM_BYTES_PREDICTED; ++i) {
+		charData.lists[i] = NULL;
+		charData.total_chars_counted[i] = 0;
+		charData.num_chars[i] = 0;
+	}
+	//printf("Loading history..."); //TODO implement
+	
     char error_buffer[PCAP_ERRBUF_SIZE];
     char *dev = "en0";
     int snapshot_len = 1028;
     int promiscuous = 1;
     int timeout = 100000;
     struct bpf_program filter;
-    char filter_exp[] = "port 80";
+    char filter_exp[] = "length >= 0";
     bpf_u_int32 subnet_mask, ip;
+
+	signal(SIGINT, send_exit_signal);
 
     if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
         printf("Could not get information for device: %s\n", dev);
@@ -55,5 +172,6 @@ int main(int argc, char **argv) {
 
     pcap_loop(handle, 0, another_callback, NULL);
     pcap_close(handle);
+	//printf("Saving history..."); //TODO implement
     return 0;
 }
