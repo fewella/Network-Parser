@@ -7,14 +7,16 @@
 #include <pthread.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
 
 #define NUM_BYTES_PREDICTED 1024
-#define RESIZE_THRESHOLD (UINT_MAX / 255)
+#define RESIZE_THRESHOLD UINT_MAX
 
 static pcap_t* handle;
 
 struct _list_entry {
-	unsigned char value;
+	int value;
 	unsigned int occurences;
 	struct _list_entry* next;
 };
@@ -24,13 +26,79 @@ typedef struct _list_entry list_entry;
 struct _idx_info {
 	list_entry* lists[NUM_BYTES_PREDICTED];
 	unsigned int total_chars_counted[NUM_BYTES_PREDICTED];
-	unsigned char num_chars[NUM_BYTES_PREDICTED];
+	unsigned int num_chars[NUM_BYTES_PREDICTED];
 };
 
 typedef struct _idx_info idx_info;
 
 
 static idx_info charData;
+
+void loadHistory(char* history_file) {
+	if (!history_file) {
+		history_file = "capture.history";
+	}
+	FILE* fp = fopen(history_file, "r");
+	if (!fp) return;
+	char buf[(255 * 5) + 2]; // 255 %c%d values + \n + \0
+	size_t i;
+	for (i = 0; i < NUM_BYTES_PREDICTED; ++i) {
+		
+		list_entry** entry_ptr = &charData.lists[i];
+
+		unsigned int* total_ptr = &charData.total_chars_counted[i];
+		*total_ptr = 0;
+
+		unsigned int num_chars;
+		//fscanf(fp, "%u ", &num_chars);
+		fread(&num_chars, 4, 1, fp);
+		charData.num_chars[i] = num_chars;
+		//printf("num_chars = %u\n", num_chars);		
+		unsigned int j;
+		for (j = 0; j < num_chars; ++j) {
+			
+			*entry_ptr = malloc(sizeof(list_entry));
+			//fscanf(fp, "%c%d ", &(*entry_ptr)->value, &(*entry_ptr)->occurences);
+			fread(&(*entry_ptr)->value, 4, 1, fp);
+			fread(&(*entry_ptr)->occurences, 4, 1, fp);
+			//printf("We are at position %ld, with j = %u\n", ftell(fp), j);
+		//	printf(" %c:%d", (*entry_ptr)->value, (*entry_ptr)->occurences);
+			*total_ptr += (*entry_ptr)->occurences;
+			entry_ptr = &(*entry_ptr)->next;
+		}
+		//printf("\n");
+		*entry_ptr = NULL;
+		fseek(fp, 4, SEEK_CUR); // Move past the newline character
+	}
+	fclose(fp);
+}
+
+void saveHistory(char* history_file) {
+	if (!history_file) {
+		history_file = "capture.history";
+	}
+	char buf[(255 * 5 * 4) + 4]; // 255 %c%d values + \n + \0
+	int buf_itr = 0;
+	FILE* fp = fopen(history_file, "w");
+	size_t i;
+	for (i = 0; i < NUM_BYTES_PREDICTED; ++i, buf_itr = 0) {
+		list_entry* entry = charData.lists[i];
+		memcpy(buf + buf_itr, &charData.num_chars[i], 4);
+		buf_itr += 4;
+		//printf("saving that we have %u unique characters:", charData.num_chars[i]);
+		while (entry != NULL) {
+			//printf(" %c:%d", entry->value, entry->occurences);
+			memcpy(buf + buf_itr, &entry->value, 4);		buf_itr += 4;
+			memcpy(buf + buf_itr, &entry->occurences, 4);		buf_itr += 4;
+			entry = entry->next;
+		}
+		//printf("\n");
+		int temp_val = '\n';
+		memcpy(buf + buf_itr, &temp_val, 4);	buf_itr += 4;
+		fwrite(buf, 1, buf_itr, fp); 
+	}
+	fclose(fp);
+}
 
 void setColor(float value) {
 	if (value >= 0.25) {
@@ -56,13 +124,14 @@ void thanosRow(int idx) {
 			list_entry* temp = *entry;
 			*entry = (*entry)->next;
 			free(temp);
+			--charData.num_chars[idx];
 		} else {
 			*entry = (*entry)->next;
 		}
 	}
 }
 
-float run_char_analysis(unsigned char c, int idx) {
+float run_char_analysis(int c, int idx) {
 	if (idx < 0 || idx >= NUM_BYTES_PREDICTED) return 0;
 	list_entry** entry = &charData.lists[idx];
 	if (*entry == NULL) {
@@ -114,7 +183,7 @@ void another_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
     for(i=0;i<pkthdr->len;i++) { 
-        float value = run_char_analysis(packet[i], i);
+        float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
 		if(isprint(packet[i]))                /* Check if the packet data is printable */
             printf("%c",packet[i]);          /* Print it */
@@ -138,7 +207,9 @@ int main(int argc, char **argv) {
 		charData.total_chars_counted[i] = 0;
 		charData.num_chars[i] = 0;
 	}
-	//printf("Loading history..."); //TODO implement
+	
+	printf("Loading history... \n"); //TODO implement
+	loadHistory(NULL);
 	
     char error_buffer[PCAP_ERRBUF_SIZE];
     char *dev = "en0";
@@ -172,6 +243,10 @@ int main(int argc, char **argv) {
 
     pcap_loop(handle, 0, another_callback, NULL);
     pcap_close(handle);
-	//printf("Saving history..."); //TODO implement
-    return 0;
+
+	printf("Saving history...\n"); //TODO implement
+    	saveHistory(NULL);
+	
+
+	return 0;
 }
