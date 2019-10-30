@@ -4,6 +4,8 @@
 #include <time.h>
 #define ERR_BUF_SIZE 2048
 
+#include "includes/dictionary.h"
+
 /**
  * Sources:
  * 	http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
@@ -50,7 +52,9 @@ int main() {
 		fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 		return(2);
 	}
+	
 	/* Grab a packet */
+	dictionary* ip_to_freq;
 	time_t start = time(NULL);
 	size_t size = 0;
 	while (1) {
