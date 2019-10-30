@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     int promiscuous = 1;
     int timeout = 100000;
     struct bpf_program filter;
-    char filter_exp[] = "port 80";
+    char filter_exp[] = "";
     bpf_u_int32 subnet_mask, ip;
 
     if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
