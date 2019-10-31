@@ -93,6 +93,17 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 { 
     int i=0; 
     static int count=0; 
+
+    struct ip *ip;
+    struct tcphdr *tcp;
+    ip = (struct ip*)(packet+sizeof(struct ether_header));
+    tcp = (struct tcphdr*)(packet+sizeof(struct ether_header)+sizeof(struct ip));
+
+    char* src = inet_ntoa(ip->ip_src);
+
+    printf("Source Port %s:%d \n", src,ntohs(tcp->th_sport));
+    char* dst = inet_ntoa(ip->ip_dst);
+    printf("Dest Port %s:%d\n\n", dst, ntohs(tcp->th_dport));
  
     printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
