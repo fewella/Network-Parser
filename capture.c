@@ -88,7 +88,7 @@ float run_char_analysis(int c, int idx) {
 }
 
 /* This function can be used as a callback for pcap_loop() */
-void another_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
+void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
         const u_char* packet) 
 { 
     int i=0; 
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    pcap_loop(handle, 0, another_callback, NULL);
+    pcap_loop(handle, 0, pcap_callback, NULL);
     pcap_close(handle);
 
 	printf("Saving history...\n"); //TODO implement

@@ -30,7 +30,7 @@ void thanosRow(int idx);
 float run_char_analysis(int c, int idx);
 
 //TODO rename
-void another_callback(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet);
+void pcap_callback(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet);
 
 void send_exit_signal(int signal);
 
