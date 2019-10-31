@@ -217,7 +217,8 @@ int main(int argc, char **argv) {
     int promiscuous = 1;
     int timeout = 100000;
     struct bpf_program filter;
-    char filter_exp[] = "length >= 0";
+
+    char filter_exp[] = "";
     bpf_u_int32 subnet_mask, ip;
 
 	signal(SIGINT, send_exit_signal);
