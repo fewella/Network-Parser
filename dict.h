@@ -41,7 +41,7 @@ int get(char* k) {
 
 	void* found = tfind(find, &root, compar);
 	if (!found) {
-		return -1;
+		return 0;
 	}
 	
 	int val = (*(node_t**)found)->value;
