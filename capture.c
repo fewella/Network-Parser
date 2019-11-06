@@ -19,6 +19,18 @@
 #include "capture.h"
 #include "dict.h"
 
+typedef struct sniff_ip {
+  u_char ip_vhl;
+  u_char ip_tos;
+  u_short ip_len;
+  u_short ip_id;
+  u_short ip_off;
+  u_char ip_ttl;
+  u_char ip_p;
+  u_short ip_sum;
+  struct in_addr ip_src, ip_dst;
+} packet_t;
+
 static pcap_t* handle;
 
 void setColor(float value) {
@@ -27,15 +39,16 @@ void setColor(float value) {
 	}	
 }
 
-
 void resetColors() {
 	printf("\033[0m");
 }
+
 
 void append_value(list_entry** entry, unsigned char c) {	
 	*entry = malloc(sizeof(list_entry));
 	**entry = (list_entry) { c, 1, NULL };
 }
+
 
 void thanosRow(int idx) {
 	list_entry** entry = &charData.lists[idx];
@@ -51,6 +64,7 @@ void thanosRow(int idx) {
 		}
 	}
 }
+
 
 float run_char_analysis(int c, int idx) {
 	if (idx < 0 || idx >= NUM_BYTES_PREDICTED) return 0;
@@ -114,7 +128,8 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
-    for(i=0;i<pkthdr->len;i++) { 
+	
+	for(i=0;i<pkthdr->len;i++) { 
         float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
 		if(isprint(packet[i]))                /* Check if the packet data is printable */
@@ -144,7 +159,7 @@ int main(int argc, char **argv) {
 	printf("Loading history... \n"); //TODO implement
 	loadHistory(NULL);
 	
-    char error_buffer[PCAP_ERRBUF_SIZE];
+	char error_buffer[PCAP_ERRBUF_SIZE];
     char *dev = "en0";
     int snapshot_len = 1028;
     int promiscuous = 1;
@@ -179,8 +194,7 @@ int main(int argc, char **argv) {
     pcap_close(handle);
 
 	printf("Saving history...\n"); //TODO implement
-    	saveHistory(NULL);
-	
+    saveHistory(NULL);
 
 	return 0;
 }
