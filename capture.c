@@ -9,14 +9,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include "history.h"
-#include "capture.h"
 #include <arpa/inet.h>
 #include <netinet/ip.h>
 #include <netinet/if_ether.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 
+#include "history.h"
+#include "capture.h"
+#include "dict.h"
 
 static pcap_t* handle;
 
