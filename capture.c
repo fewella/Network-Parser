@@ -19,18 +19,6 @@
 #include "capture.h"
 #include "dict.h"
 
-typedef struct sniff_ip {
-  u_char ip_vhl;
-  u_char ip_tos;
-  u_short ip_len;
-  u_short ip_id;
-  u_short ip_off;
-  u_char ip_ttl;
-  u_char ip_p;
-  u_short ip_sum;
-  struct in_addr ip_src, ip_dst;
-} packet_t;
-
 static pcap_t* handle;
 
 void setColor(float value) {
@@ -129,8 +117,6 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
 	
-	
-
 	for(i=0;i<pkthdr->len;i++) { 
         float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
