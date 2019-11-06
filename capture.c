@@ -129,6 +129,8 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
 	
+	
+
 	for(i=0;i<pkthdr->len;i++) { 
         float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
