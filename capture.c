@@ -1,3 +1,4 @@
+#include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pcap.h>
@@ -12,6 +13,34 @@
  *  https://www.tcpdump.org/pcap.html
  *
  */
+
+void* root;
+
+typedef struct char_to_int_node {
+	char* key;
+	int value;
+} node_t; 
+
+int compar(const void* l, const void* r) {
+	return strcmp((char*)l, (char*)r);
+}
+
+void insert(char* k, int v) {
+	node_t* new_node = malloc(sizeof(node_t));
+	new_node->key = strdup(k);
+	new_node->value = v;
+	tsearch(new_node, &root, compar);
+}
+
+int get(char* k) {
+	node_t* find = malloc(sizeof(node_t));
+	find->key = k;
+	
+	void* value = tfind(find, &root, compar);
+	int val = (*(node_t**)value)->value;
+	free(find);
+	return val;
+}
 
 int main() {
 	char* dev, errbuf[ERR_BUF_SIZE];
@@ -54,7 +83,6 @@ int main() {
 	}
 	
 	/* Grab a packet */
-	dictionary* ip_to_freq;
 	time_t start = time(NULL);
 	size_t size = 0;
 	while (1) {

@@ -7,7 +7,7 @@ INC = -I./includes/
 all : capturemake
 
 capturemake: 
-	$(CC) -o capture capture.c $(LIBS) $(INC)
+	$(CC) -o capture capture.c $(LIBS) $(INC) 
 
 
 clean: 
