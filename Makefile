@@ -2,24 +2,28 @@ CC=gcc
 
 EXE_NAME=capture
 
-OBJ_DIR=.obj/
+OBJ_DIR=.obj
+OBJ_FILES=capture.o history.o dict.o
 
 LIBS=-lpcap
 
+
 .PHONY : all
-all : $(OBJ_DIR) capturemake
+all : $(OBJ_DIR) $(EXE_NAME)
 
-capturemake: capture.o history.o 
-	$(CC) -o $(EXE_NAME) $(addprefix $(OBJ_DIR), $^) $(LIBS)
 
-capture.o: capture.c
-	$(CC) -c $^ -o $(OBJ_DIR)$@
+$(EXE_NAME): $(addprefix $(OBJ_DIR)/, $(OBJ_FILES))
+	$(CC) $^ $(LIBS) -o $@
 
-history.o: history.c
-	$(CC) -c $^ -o $(OBJ_DIR)$@
+
+$(OBJ_DIR)/%.o: %.c
+	$(CC) -c $^ -o $@
+
+
 $(OBJ_DIR):
-	mkdir .obj/
+	mkdir $@/
+
 
 clean: 
-	rm $(EXE_NAME)
+	rm -f $(EXE_NAME)
 	rm -rf $(OBJ_DIR)
