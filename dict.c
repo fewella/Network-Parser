@@ -13,12 +13,14 @@ typedef struct char_to_int_node {
 } node_t;
 
 int compar(const void* l, const void* r) {
-	return strcmp((char*)l, (char*)r);
+	node_t* left = (node_t*)l;
+	node_t* right = (node_t*)r;
+	return strcmp((char*)left->key, (char*)right->key);
 }
 
 void del(char* k) {
 	node_t* find = malloc(sizeof(node_t));
-	find->key = k;
+	find->key = strdup(k);
 	void* p = tdelete(find, &root, compar);
 	free(find);
 }
@@ -30,7 +32,7 @@ void insert(char* k, int v) {
 	} 
 	
 	node_t* new_node = malloc(sizeof(node_t));
-	new_node->key = k;
+	new_node->key = strdup(k);
 	new_node->value = v;
 	tsearch(new_node, &root, compar);
 }
@@ -38,7 +40,7 @@ void insert(char* k, int v) {
 
 int get(char* k) {
 	node_t* find = malloc(sizeof(node_t));
-	find->key = k;
+	find->key = strdup(k);
 
 	void* found = tfind(find, &root, compar);
 	if (!found) {

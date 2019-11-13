@@ -21,6 +21,7 @@
 
 static pcap_t* handle;
 
+
 void setColor(float value) {
 	if (value >= 0.25) {
 		printf("\033[0;32m");
@@ -116,9 +117,13 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	strcpy(dst, inet_ntoa(ip->ip_dst));
     printf("Dest Port %s:%d\n\n", dst, ntohs(tcp->th_dport));
  	
+
 	insert(src, get(src) + pkthdr->len);
 	insert(dst, get(dst) + pkthdr->len);
 	
+	printf("src->total: %s -> %d\n", src, get(src));
+	printf("dst->total: %s -> %d\n", dst, get(dst));
+
 
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */

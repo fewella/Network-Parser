@@ -1,3 +1,6 @@
+
+// for del, insert, and get, need to pass in one of the following pointers as root (the first argument)
+//void* outgoing;
 void* root;
 
 /**
