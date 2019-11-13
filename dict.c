@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include <search.h>
 
 #include "dict.h"
@@ -16,7 +18,6 @@ void del(char* k) {
 	find->key = k;
 	void* p = tdelete(find, &root, compar);
 	free(find);
-	printf("del ret: %p\n", p);
 }
 
 

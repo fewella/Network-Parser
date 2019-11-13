@@ -19,7 +19,8 @@ history.o: history.c
 	$(CC) -c $^ -o $(OBJ_DIR)$@
 
 dict.o: dict.c
-	$(CC) -c $^ -o $(OBJ_DRC)$@
+	$(CC) -c $^ -o $(OBJ_DIR)$@
+
 
 $(OBJ_DIR):
 	mkdir .obj/
