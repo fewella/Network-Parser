@@ -3,17 +3,21 @@
 #define NUM_BYTES_PREDICTED 1024
 #define RESIZE_THRESHOLD UINT_MAX
 
+/**
+ * This struct handles the character occurences a single byte range
+ * in the packet.
+**/
 struct _list_entry {
-	int value;
-	unsigned int occurences;
-	struct _list_entry* next;
+	int value;			/* The ASCII value of the character */
+	unsigned int occurences;	/* The number of occurences of this paricular character */
+	struct _list_entry* next;	/* The ptr to the next struct, in an unsorted singly-linked list */
 };
 
 typedef struct _list_entry list_entry;
 
 struct _idx_info {
-	list_entry* lists[NUM_BYTES_PREDICTED];
-	unsigned int total_chars_counted[NUM_BYTES_PREDICTED];
+	list_entry* lists[NUM_BYTES_PREDICTED];				/* Stores an array of byte information for NUM_BYTES_PREDICTED bytes */
+	unsigned int total_chars_counted[NUM_BYTES_PREDICTED];		
 	unsigned int num_chars[NUM_BYTES_PREDICTED];
 };
 

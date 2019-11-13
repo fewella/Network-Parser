@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <search.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "dict.h"
 
