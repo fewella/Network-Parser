@@ -99,6 +99,8 @@ float run_char_analysis(int c, int idx) {
 void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
         const u_char* packet) 
 { 
+	unsigned size = 128;
+
     int i=0; 
     static int count=0; 
 
@@ -107,13 +109,18 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     ip = (struct ip*)(packet+sizeof(struct ether_header));
     tcp = (struct tcphdr*)(packet+sizeof(struct ether_header)+sizeof(struct ip));
 
-    char* src = inet_ntoa(ip->ip_src);
-
+    char src[size];
+	strcpy(src, inet_ntoa(ip->ip_src));
     printf("Source Port %s:%d \n", src,ntohs(tcp->th_sport));
-    char* dst = inet_ntoa(ip->ip_dst);
+    char dst[size];
+	strcpy(dst, inet_ntoa(ip->ip_dst));
     printf("Dest Port %s:%d\n\n", dst, ntohs(tcp->th_dport));
- 
-    printf("Packet Count: %d\n", ++count);    /* Number of Packets */
+ 	
+	insert(src, get(src) + pkthdr->len);
+	insert(dst, get(dst) + pkthdr->len);
+	
+
+	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
 	

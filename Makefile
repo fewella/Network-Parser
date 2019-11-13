@@ -9,7 +9,7 @@ LIBS=-lpcap
 .PHONY : all
 all : $(OBJ_DIR) capturemake
 
-capturemake: capture.o history.o 
+capturemake: capture.o history.o dict.o
 	$(CC) -o $(EXE_NAME) $(addprefix $(OBJ_DIR), $^) $(LIBS)
 
 capture.o: capture.c
@@ -17,6 +17,10 @@ capture.o: capture.c
 
 history.o: history.c
 	$(CC) -c $^ -o $(OBJ_DIR)$@
+
+dict.o: dict.c
+	$(CC) -c $^ -o $(OBJ_DRC)$@
+
 $(OBJ_DIR):
 	mkdir .obj/
 
