@@ -1,5 +1,8 @@
 void* root;
 
+/**
+ * Internal compare method for two keys
+ */
 int compar(const void*, const void*);
 
 /** Takes a key, removes the associated key-value pair
