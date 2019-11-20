@@ -36,3 +36,4 @@ $(OBJ_DIR):
 clean: 
 	rm -f $(EXE_NAME)
 	rm -rf $(OBJ_DIR)
+	rm -f *.o
