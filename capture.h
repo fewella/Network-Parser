@@ -7,13 +7,20 @@
  * This struct handles the character occurences a single byte range
  * in the packet.
 **/
-struct _list_entry {
+typedef struct _list_entry {
 	int value;			/* The ASCII value of the character */
 	unsigned int occurences;	/* The number of occurences of this paricular character */
 	struct _list_entry* next;	/* The ptr to the next struct, in an unsorted singly-linked list */
-};
+} list_entry;
 
-typedef struct _list_entry list_entry;
+/**
+ * Struct to hold datapoints, which will be read by R UI interface
+ */
+typedef struct _point {
+	
+} point;
+
+
 
 struct _idx_info {
 	list_entry* lists[NUM_BYTES_PREDICTED];				/* Stores an array of byte information for NUM_BYTES_PREDICTED bytes */

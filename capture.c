@@ -14,6 +14,7 @@
 #include <netinet/if_ether.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
+#include <netdb.h>
 
 #include "history.h"
 #include "capture.h"
@@ -22,11 +23,34 @@
 static pcap_t* handle;
 
 
+char* get_hostname(char* ip_address, char* port) {
+	struct sockaddr_in sa;
+	memset(&sa, 0, sizeof(sa));
+	sa.sin_family = AF_INET;
+
+	char node[NI_MAXHOST];
+
+	inet_pton(AF_INET, ip_address, &sa.sin_addr);
+	int res = getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, NI_NAMEREQD);
+	if (res != 0) {
+		printf("getnameinfo failed!\n");
+		return NULL;
+	} else {
+		printf("SUCC\n");
+	}
+
+	printf("node: %s\n", node);
+
+	return NULL;
+}
+
+
 void setColor(float value) {
 	if (value >= 0.25) {
 		printf("\033[0;32m");
 	}	
 }
+
 
 void resetColors() {
 	printf("\033[0m");
@@ -96,6 +120,7 @@ float run_char_analysis(int c, int idx) {
 
 }
 
+
 /* This function can be used as a callback for pcap_loop() */
 void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
         const u_char* packet) 
@@ -111,19 +136,27 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     tcp = (struct tcphdr*)(packet+sizeof(struct ether_header)+sizeof(struct ip));
 
     char src[size];
+	int src_port = ntohs(tcp->th_sport);
 	strcpy(src, inet_ntoa(ip->ip_src));
-    printf("Source Port %s:%d \n", src,ntohs(tcp->th_sport));
-    char dst[size];
+    printf("Source Port %s:%d \n", src, src_port);
+    
+	char dst[size];
+	int dst_port = ntohs(tcp->th_dport);
 	strcpy(dst, inet_ntoa(ip->ip_dst));
-    printf("Dest Port %s:%d\n\n", dst, ntohs(tcp->th_dport));
- 	
+    printf("Dest Port %s:%d\n\n", dst, dst_port);
 
 	insert(src, get(src) + pkthdr->len);
 	insert(dst, get(dst) + pkthdr->len);
-	
+
+	char src_port_str[size];
+	char dst_port_str[size];
+	sprintf(src_port_str, "%d", src_port);
+	sprintf(dst_port_str, "%d", dst_port);
 	printf("src->total: %s -> %d\n", src, get(src));
 	printf("dst->total: %s -> %d\n", dst, get(dst));
 
+	get_hostname(src, src_port_str);
+	get_hostname(dst, dst_port_str);
 
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
@@ -143,10 +176,12 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     printf("\n\n");
 }
 
+
 void send_exit_signal(int signal) {
 	printf("Sending Exit Signal...\n");
 	pcap_breakloop(handle);
 }
+
 
 int main(int argc, char **argv) {
 	int i;
