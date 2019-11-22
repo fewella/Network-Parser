@@ -7,40 +7,41 @@
 
 #include "dict.h"
 
-typedef struct char_to_int_node {
-	char* key;
+typedef struct int_to_int_node {
+	int key;
 	int value;
 } node_t;
 
 int compar(const void* l, const void* r) {
 	node_t* left = (node_t*)l;
 	node_t* right = (node_t*)r;
-	return strcmp((char*)left->key, (char*)right->key);
+	return left->key - right->key;
 }
 
-void del(char* k) {
+
+void del(int k) {
 	node_t* find = malloc(sizeof(node_t));
-	find->key = strdup(k);
+	find->key = k;
 	void* p = tdelete(find, &root, compar);
 	free(find);
 }
 
 
-void insert(char* k, int v) {
+void insert(int k, int v) {
 	if (get(k) != -1) {
-		del(k);
+		del(k); // this is extremely expensive - try just modifying the returned node instead
 	} 
 	
 	node_t* new_node = malloc(sizeof(node_t));
-	new_node->key = strdup(k);
+	new_node->key = k;
 	new_node->value = v;
 	tsearch(new_node, &root, compar);
 }
 
 
-int get(char* k) {
+int get(int k) {
 	node_t* find = malloc(sizeof(node_t));
-	find->key = strdup(k);
+	find->key = k;
 
 	void* found = tfind(find, &root, compar);
 	if (!found) {

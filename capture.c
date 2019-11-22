@@ -52,12 +52,24 @@ int resolve_hostname(char* node) {
 
 	printf("resolved: %s\n", resolved);
 
+	// Mappling:
+	int key = -1;
+	if (!strcmp(resolved, "google.com")) {
+		key = 1;
+	} else if (!strcmp(resolved, "facebook.com")) {
+		key = 2;
+	} else if (!strcmp(resolved, "amazonaws.com")) {
+		key = 3;
+	} else if (!strcmp(resolved, "googleusercontent.com")) {
+		key = 4;
+	}
+
 	free(resolved);
 
-	return -1;
+	return key;
 }
 
-char* get_hostname(char* ip_address) {
+int get_hostname(char* ip_address) {
 	struct sockaddr_in sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
@@ -68,15 +80,11 @@ char* get_hostname(char* ip_address) {
 	int res = getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, NI_NAMEREQD);
 	if (res != 0) {
 		printf("getnameinfo failed!\n");
-		return NULL;
-	} else {
-		printf("SUCCESS\n");
+		return -1;
 	}
 
-	printf("node: %s\n", node);
-	int key = resolve_hostname(node);
-
-	return NULL;
+	//printf("node: %s\n", node);
+	return resolve_hostname(node);
 }
 
 
@@ -180,17 +188,16 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	strcpy(dst, inet_ntoa(ip->ip_dst));
     printf("Dest Port %s:%d\n\n", dst, dst_port);
 
-	insert(src, get(src) + pkthdr->len);
-	insert(dst, get(dst) + pkthdr->len);
+	int src_key = get_hostname(src);
+	int dst_key = get_hostname(dst);
+	
+	insert(src_key, get(src_key) + pkthdr->len);
+	insert(dst_key, get(dst_key) + pkthdr->len);
 
-	printf("src->total: %s -> %d\n", src, get(src));
-	printf("dst->total: %s -> %d\n", dst, get(dst));
-
-	get_hostname(src);
-	get_hostname(dst);
+	printf("src->total: %d -> %d\n", src_key, get(src_key));
+	printf("dst->total: %d -> %d\n", dst_key, get(dst_key));
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
-	
 	
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
