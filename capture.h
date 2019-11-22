@@ -17,7 +17,11 @@ typedef struct _list_entry {
  * Struct to hold datapoints, which will be read by R UI interface
  */
 typedef struct _point {
-	
+	// represents domain
+	int key;
+
+	// network traffic per second
+	double freq;
 } point;
 
 
@@ -31,6 +35,14 @@ struct _idx_info {
 typedef struct _idx_info idx_info;
 
 static idx_info charData;
+static pcap_t* handle;
+
+/** resolve raw domain name to easily recognizable domain name
+ * returns an int as opposed to a char*, to make communication with Rshiny easier
+ */
+int resolve_hostname(char*);
+/** resolve IP address into raw domain name **/
+char* get_hostname(char*);
 
 void setColor(float);
 void resetColors(void);

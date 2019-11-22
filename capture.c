@@ -20,38 +20,44 @@
 #include "capture.h"
 #include "dict.h"
 
-static pcap_t* handle;
-
-char* resolve_hostname(char* node) {
-	int seen_dot = 0;
-
+int resolve_hostname(char* node) {
 	char* prev = NULL;
 	char* curr = strtok(node, ".");
+	
 	while (1) {
-		printf("%s\n", curr);
 		char* p = strtok(NULL, ".");
 		if (!p) {
 			break;
 		}
-
 		prev = curr;
 		curr = p;
 	}
 
-	size_t size = strlen(prev) + 1 + strlen(curr) + 1;
-	char resolved[size];
+	if (!prev) {
+		return -1;
+	}
+
+	size_t size = 1024;
+	char* resolved = malloc(size);
 	memset(resolved, '\0', size);
 
 	strcat(resolved, prev);
 	strcat(resolved, ".");
 	strcat(resolved, curr);
 
+	if (!strcmp(resolved, "1e100.net")) {
+		memset(resolved, '\0', size);
+		strcat(resolved, "google.com");
+	}
+
 	printf("resolved: %s\n", resolved);
 
-	return NULL;
+	free(resolved);
+
+	return -1;
 }
 
-char* get_hostname(char* ip_address, char* port) {
+char* get_hostname(char* ip_address) {
 	struct sockaddr_in sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
@@ -68,8 +74,7 @@ char* get_hostname(char* ip_address, char* port) {
 	}
 
 	printf("node: %s\n", node);
-	char* resolved = resolve_hostname(node);
-	printf("resolved node: %s\n", resolved);
+	int key = resolve_hostname(node);
 
 	return NULL;
 }
@@ -178,16 +183,15 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	insert(src, get(src) + pkthdr->len);
 	insert(dst, get(dst) + pkthdr->len);
 
-	char src_port_str[size];
-	char dst_port_str[size];
-	sprintf(src_port_str, "%d", src_port);
-	sprintf(dst_port_str, "%d", dst_port);
 	printf("src->total: %s -> %d\n", src, get(src));
 	printf("dst->total: %s -> %d\n", dst, get(dst));
 
-	get_hostname(src, src_port_str);
-	get_hostname(dst, dst_port_str);
+	get_hostname(src);
+	get_hostname(dst);
 
+	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
+	
+	
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
