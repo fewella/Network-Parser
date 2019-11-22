@@ -22,6 +22,34 @@
 
 static pcap_t* handle;
 
+char* resolve_hostname(char* node) {
+	int seen_dot = 0;
+
+	char* prev = NULL;
+	char* curr = strtok(node, ".");
+	while (1) {
+		printf("%s\n", curr);
+		char* p = strtok(NULL, ".");
+		if (!p) {
+			break;
+		}
+
+		prev = curr;
+		curr = p;
+	}
+
+	size_t size = strlen(prev) + 1 + strlen(curr) + 1;
+	char resolved[size];
+	memset(resolved, '\0', size);
+
+	strcat(resolved, prev);
+	strcat(resolved, ".");
+	strcat(resolved, curr);
+
+	printf("resolved: %s\n", resolved);
+
+	return NULL;
+}
 
 char* get_hostname(char* ip_address, char* port) {
 	struct sockaddr_in sa;
@@ -36,10 +64,12 @@ char* get_hostname(char* ip_address, char* port) {
 		printf("getnameinfo failed!\n");
 		return NULL;
 	} else {
-		printf("SUCC\n");
+		printf("SUCCESS\n");
 	}
 
 	printf("node: %s\n", node);
+	char* resolved = resolve_hostname(node);
+	printf("resolved node: %s\n", resolved);
 
 	return NULL;
 }
