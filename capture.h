@@ -24,7 +24,7 @@ typedef struct _point {
 	double freq;
 } point;
 
-
+static int NUM_KEYS = 5;
 
 struct _idx_info {
 	list_entry* lists[NUM_BYTES_PREDICTED];				/* Stores an array of byte information for NUM_BYTES_PREDICTED bytes */
@@ -38,11 +38,13 @@ static idx_info charData;
 static pcap_t* handle;
 
 /** resolve raw domain name to easily recognizable domain name
- * returns an int as opposed to a char*, to make communication with Rshiny easier
+ *  returns an int as opposed to a char*, to make communication with Rshiny easier
  */
 int resolve_hostname(char*);
-/** resolve IP address into raw domain name **/
-char* get_hostname(char*);
+/** resolve IP address into raw domain name
+ *  Takes raw IP address, and passes messy domain name to resolve_hostname
+ */
+int get_hostname(char*);
 
 void setColor(float);
 void resetColors(void);

@@ -24,3 +24,8 @@ void insert(int k, int v);
  */
 int get(int k);
 
+/**
+ * Goes through each node in the dict, makes a struct for each node (key->freq), and puts into array
+ * Should also communicate with rshiny
+ */
+void walk();

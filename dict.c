@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "dict.h"
+#include "capture.h"
 
 typedef struct int_to_int_node {
 	int key;
@@ -53,4 +54,15 @@ int get(int k) {
 	return val;
 }
 
+void walk() {
+	printf("walking\n");
+	int i;
+	for (i = -1; i < NUM_KEYS - 1; i++) {
+		// TODO: sent to rshiny
+		point curr;
+		curr.key = i;
+		curr.freq = get(i);
+		printf("key, freq: %d, %f\n", curr.key, curr.freq);
+	}
+}
 

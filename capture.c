@@ -15,10 +15,15 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
+#include <time.h>
 
 #include "history.h"
 #include "capture.h"
 #include "dict.h"
+
+
+static time_t prev;
+
 
 int resolve_hostname(char* node) {
 	char* prev = NULL;
@@ -52,16 +57,17 @@ int resolve_hostname(char* node) {
 
 	printf("resolved: %s\n", resolved);
 
-	// Mappling:
+	// Mapping:
 	int key = -1;
-	if (!strcmp(resolved, "google.com")) {
-		key = 1;
+	
+		   if (!strcmp(resolved, "google.com")) {
+		key = 0;
 	} else if (!strcmp(resolved, "facebook.com")) {
-		key = 2;
+		key = 1;
 	} else if (!strcmp(resolved, "amazonaws.com")) {
-		key = 3;
+		key = 2;
 	} else if (!strcmp(resolved, "googleusercontent.com")) {
-		key = 4;
+		key = 3;
 	}
 
 	free(resolved);
@@ -198,7 +204,11 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	printf("dst->total: %d -> %d\n", dst_key, get(dst_key));
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
-	
+	if (difftime(time(NULL), prev) >= 1) {
+		prev = time(NULL);
+		walk();
+	}
+
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
     printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     printf("Payload:\n");                     /* And now the data */
@@ -225,6 +235,8 @@ void send_exit_signal(int signal) {
 
 
 int main(int argc, char **argv) {
+	prev = time(NULL);
+	
 	int i;
 	for(i = 0; i < NUM_BYTES_PREDICTED; ++i) {
 		charData.lists[i] = NULL;
