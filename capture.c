@@ -48,15 +48,16 @@ int resolve_hostname(char* node) {
 	strcat(resolved, prev);
 	strcat(resolved, ".");
 	strcat(resolved, curr);
+	printf("resolved: %s\n", resolved);
 
+	
+
+	// Mapping:
 	if (!strcmp(resolved, "1e100.net")) {
 		memset(resolved, '\0', size);
 		strcat(resolved, "google.com");
 	}
 
-	printf("resolved: %s\n", resolved);
-
-	// Mapping:
 	int key = -1;
 	
 		   if (!strcmp(resolved, "google.com")) {
@@ -67,7 +68,11 @@ int resolve_hostname(char* node) {
 		key = 2;
 	} else if (!strcmp(resolved, "googleusercontent.com")) {
 		key = 3;
-	}
+	} else if (!strcmp(resolved, "illinois.edu")) {
+		key = 4;
+	} else if (!strcmp(resolved, "github.com")) {
+		key = 5;
+	} 
 
 	free(resolved);
 
