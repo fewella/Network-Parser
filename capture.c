@@ -24,7 +24,6 @@
 
 static time_t prev;
 
-
 int resolve_hostname(char* node) {
 	char* prev = NULL;
 	char* curr = strtok(node, ".");

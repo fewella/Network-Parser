@@ -3,6 +3,9 @@
 #define NUM_BYTES_PREDICTED 1024
 #define RESIZE_THRESHOLD UINT_MAX
 
+#define NUM_KEYS 5
+
+
 /**
  * This struct handles the character occurences a single byte range
  * in the packet.
@@ -24,7 +27,9 @@ typedef struct _point {
 	double freq;
 } point;
 
-static int NUM_KEYS = 5;
+
+static point datapoints[NUM_KEYS];
+
 
 struct _idx_info {
 	list_entry* lists[NUM_BYTES_PREDICTED];				/* Stores an array of byte information for NUM_BYTES_PREDICTED bytes */

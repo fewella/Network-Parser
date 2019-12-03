@@ -63,6 +63,8 @@ void walk() {
 		curr.key = i;
 		curr.freq = get(i);
 		printf("key, freq: %d, %f\n", curr.key, curr.freq);
+
+		datapoints[i + 1] = curr;
 	}
 }
 
