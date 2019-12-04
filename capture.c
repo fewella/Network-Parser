@@ -60,7 +60,7 @@ int resolve_hostname(char* node) {
 
 	int key = -1;
 	
-		   if (!strcmp(resolved, "google.com")) {
+	if (!strcmp(resolved, "google.com")) {
 		key = 0;
 	} else if (!strcmp(resolved, "facebook.com")) {
 		key = 1;
