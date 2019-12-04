@@ -28,6 +28,20 @@ shinyServer(function(input, output) {
     df = getData()
     plot(df$time, df$y)
     
+  
+  })
+  
+  getData1 = reactive({
+    invalidateLater(500 * 5)
+    df=data.frame(time=1:var_n,y=rnorm(var_n))
+    var_n <<- var_n + 5
+    print(var_n)
+    return(df)
+  })
+  
+  output$myPlot1 <- renderPlot({
+    df = getData1()
+    plot(df$time, df$y)
   })
   
 })
