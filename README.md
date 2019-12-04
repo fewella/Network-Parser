@@ -19,6 +19,10 @@ We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation
 make && ./capture
 ```
 
+## Future Additions
+* Stratify data by port number/protocol
+* Intrusion detection
+
 ## Who and When (and actually Why)
 * Ajay Fewell - fewella2 at uiuc dot edu
 * Rishub Podar - podar2 at uiuc dot edu
