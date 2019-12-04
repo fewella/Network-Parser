@@ -9,8 +9,6 @@ When you’re using the Internet, your computer is constantly sending and receiv
 
 While there are already apps which monitor network traffic, many of them do very little purging on their own, and display everything that the network packets contain, which is not very helpful for determining what data websites might be collecting from your computer. 
 
-(Also for CS296-41 credit)
-
 ## How
 We used a library called [libpcap](https://github.com/the-tcpdump-group/libpcap) to do most of the packet analysis
 We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation
@@ -20,7 +18,9 @@ We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation
 make && ./capture
 ```
 
-## Who and When
-Ajay Fewell - fewella2 at uiuc dot edu
-Rishub Podar - podar2 at uiuc dot edu
-Drew Litkowiak - dnl2 at uiuc dot edu
+## Who and When (and actually Why)
+* Ajay Fewell - fewella2 at uiuc dot edu
+* Rishub Podar - podar2 at uiuc dot edu
+* Drew Litkowiak - dnl2 at uiuc dot edu
+* Mentored by Aniket Shirke - anikets at illinois dot edu
+Fall 2019, CS296-41
