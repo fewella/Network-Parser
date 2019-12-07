@@ -64,3 +64,5 @@ void pcap_callback(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* 
 
 void send_exit_signal(int signal);
 
+//The interface for use as a library
+void* startup(void* unused);

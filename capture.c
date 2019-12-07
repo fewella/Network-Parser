@@ -13,9 +13,12 @@
 #include <netinet/ip.h>
 #include <netinet/if_ether.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <time.h>
+#include <fcntl.h>
 
 #include "history.h"
 #include "capture.h"
@@ -237,56 +240,65 @@ void send_exit_signal(int signal) {
 	pcap_breakloop(handle);
 }
 
+void* startup(void* options_raw) {
+  long options = (long) options_raw;
+  if (options == 1) {
+    int devnull = open("/dev/null", O_WRONLY);
+    dup2(devnull, 1);
+  }
+  
+  prev = time(NULL);
+  
+  int i;
+  for(i = 0; i < NUM_BYTES_PREDICTED; ++i) {
+    charData.lists[i] = NULL;
+    charData.total_chars_counted[i] = 0;
+    charData.num_chars[i] = 0;
+  }
+  
+  printf("Loading history... \n"); //TODO implement
+  loadHistory(NULL);
+  
+  char error_buffer[PCAP_ERRBUF_SIZE];
+  char *dev = "en0";
+  int snapshot_len = 1028;
+  int promiscuous = 1;
+  int timeout = 100000;
+  struct bpf_program filter;
+  
+  char filter_exp[] = "";
+  bpf_u_int32 subnet_mask, ip;
+  
+  signal(SIGINT, send_exit_signal);
+  
+  if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
+    printf("Could not get information for device: %s\n", dev);
+    ip = 0;
+    subnet_mask = 0;
+  }
+  handle = pcap_open_live(dev, BUFSIZ, 1, 1000, error_buffer);
+  if (handle == NULL) {
+    printf("Could not open %s - %s\n", dev, error_buffer);
+    return NULL;
+  }
+  if (pcap_compile(handle, &filter, filter_exp, 0, ip) == -1) {
+    printf("Bad filter - %s\n", pcap_geterr(handle));
+    return NULL;
+  }
+  if (pcap_setfilter(handle, &filter) == -1) {
+    printf("Error setting filter - %s\n", pcap_geterr(handle));
+    return NULL;
+  }
+  
+  pcap_loop(handle, 0, pcap_callback, NULL);
+  pcap_close(handle);
+  
+  printf("Saving history...\n"); //TODO implement
+  saveHistory(NULL);
+  return NULL;
+}
 
 int main(int argc, char **argv) {
-	prev = time(NULL);
-	
-	int i;
-	for(i = 0; i < NUM_BYTES_PREDICTED; ++i) {
-		charData.lists[i] = NULL;
-		charData.total_chars_counted[i] = 0;
-		charData.num_chars[i] = 0;
-	}
-	
-	printf("Loading history... \n"); //TODO implement
-	loadHistory(NULL);
-	
-	char error_buffer[PCAP_ERRBUF_SIZE];
-    char *dev = "en0";
-    int snapshot_len = 1028;
-    int promiscuous = 1;
-    int timeout = 100000;
-    struct bpf_program filter;
-
-    char filter_exp[] = "";
-    bpf_u_int32 subnet_mask, ip;
-
-	signal(SIGINT, send_exit_signal);
-
-    if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
-        printf("Could not get information for device: %s\n", dev);
-        ip = 0;
-        subnet_mask = 0;
-    }
-    handle = pcap_open_live(dev, BUFSIZ, 1, 1000, error_buffer);
-    if (handle == NULL) {
-        printf("Could not open %s - %s\n", dev, error_buffer);
-        return 2;
-    }
-    if (pcap_compile(handle, &filter, filter_exp, 0, ip) == -1) {
-        printf("Bad filter - %s\n", pcap_geterr(handle));
-        return 2;
-    }
-    if (pcap_setfilter(handle, &filter) == -1) {
-        printf("Error setting filter - %s\n", pcap_geterr(handle));
-        return 2;
-    }
-
-    pcap_loop(handle, 0, pcap_callback, NULL);
-    pcap_close(handle);
-
-	printf("Saving history...\n"); //TODO implement
-    saveHistory(NULL);
-
-	return 0;
+	startup(NULL);
+  return 0;
 }

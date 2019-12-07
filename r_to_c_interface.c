@@ -2,9 +2,42 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <stdio.h>
-#include <capture.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#include "capture.h"
+
+pthread_t session_thread;
+
+SEXP startSession() {
+  pthread_create(&session_thread, NULL, startup, (void*) 1);
+  return R_NilValue;
+}
+
+SEXP endSession() {
+  SEXP out = PROTECT(allocVector(INTSXP, 1));
+  int* val = INTEGER(out);
+  *val = pthread_cancel(session_thread);
+  pthread_join(session_thread, NULL);
+  UNPROTECT(1);
+  return out;
+}
+
+void* wait_seconds(void* value) {
+  long seconds = (long) value;
+  printf("Hello\n");
+  sleep(seconds);
+  printf("World!\n");
+  return NULL;
+}
+
+SEXP testThread() {
+  pthread_create(&session_thread, NULL, wait_seconds, (void*) 3);
+  pthread_detach(session_thread);
+  return R_NilValue;
+}
 
 SEXP dotProd(SEXP a, SEXP b) {
   printf("entering function");
@@ -58,8 +91,8 @@ SEXP getSecondData() {
     }
 	}
 	
-	SEXP ans = PROTECT(allocVector(VECSXP, 2)),
-	     nms = PROTECT(allocVector(STRSXP, 2)),
+	SEXP ans = PROTECT(allocVector(VECSXP, 5)),
+	     nms = PROTECT(allocVector(STRSXP, 5)),
 	     rnms = PROTECT(allocVector(INTSXP, 2));
 	
 	SET_STRING_ELT(nms, 0, mkChar("myColumn1"));

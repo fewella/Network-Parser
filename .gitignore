@@ -59,3 +59,4 @@ capture
 
 # R files
 .R*
+.Rproj.user
