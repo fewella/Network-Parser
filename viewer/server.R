@@ -33,11 +33,11 @@ shinyServer(function(input, output) {
   })
   
   getRealData = reactive({
-    invalidateLater(500 * 5)
+    invalidateLater(1000)
     df <- data.frame(time = 1:60, .Call("getSecondData"))
     #print(colnames(df))
     #print(df$myColumn4)
-    print(df)
+    #print(df)
     return(df)
   })
   
@@ -49,10 +49,10 @@ shinyServer(function(input, output) {
     
     par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
     plot(df$time, df$value, col=df$source, xlab = "Time", ylab = "Frequency")
-    legend("right", inset=c(-0.13,0), legend = unique(df$source), col=1:length(df$source), pch = 1)
+    legend("right", inset=c(-0.17,0), legend = unique(df$source), col=1:length(df$source), pch = 1)
     #ggplot(df, aes(time, value)) + geom_line(aes(color = source))
 
-  })
+  }, width = 800)
   
   getData1 = reactive({
     invalidateLater(500 * 5)
@@ -65,6 +65,6 @@ shinyServer(function(input, output) {
   output$myPlot1 <- renderPlot({
     df = getData1()
     
-  })
+  }, width = 800)
   
 })

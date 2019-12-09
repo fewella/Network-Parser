@@ -24,6 +24,7 @@
 #include "capture.h"
 #include "dict.h"
 
+static int out_filedes;
 
 static time_t prev;
 
@@ -51,7 +52,7 @@ int resolve_hostname(char* node) {
 	strcat(resolved, prev);
 	strcat(resolved, ".");
 	strcat(resolved, curr);
-	printf("resolved: %s\n", resolved);
+	dprintf(out_filedes, "resolved: %s\n", resolved);
 
 	
 
@@ -92,7 +93,7 @@ int get_hostname(char* ip_address) {
 	inet_pton(AF_INET, ip_address, &sa.sin_addr);
 	int res = getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, NI_NAMEREQD);
 	if (res != 0) {
-		printf("getnameinfo failed!\n");
+		dprintf(out_filedes, "getnameinfo failed!\n");
 		return -1;
 	}
 
@@ -103,13 +104,13 @@ int get_hostname(char* ip_address) {
 
 void setColor(float value) {
 	if (value >= 0.25) {
-		printf("\033[0;32m");
+		dprintf(out_filedes, "\033[0;32m");
 	}	
 }
 
 
 void resetColors() {
-	printf("\033[0m");
+	dprintf(out_filedes, "\033[0m");
 }
 
 
@@ -194,12 +195,12 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     char src[size];
 	int src_port = ntohs(tcp->th_sport);
 	strcpy(src, inet_ntoa(ip->ip_src));
-    printf("Source Port %s:%d \n", src, src_port);
+    dprintf(out_filedes, "Source Port %s:%d \n", src, src_port);
     
 	char dst[size];
 	int dst_port = ntohs(tcp->th_dport);
 	strcpy(dst, inet_ntoa(ip->ip_dst));
-    printf("Dest Port %s:%d\n\n", dst, dst_port);
+    dprintf(out_filedes, "Dest Port %s:%d\n\n", dst, dst_port);
 
 	int src_key = get_hostname(src);
 	int dst_key = get_hostname(dst);
@@ -207,39 +208,39 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	insert(src_key, get(src_key) + pkthdr->len);
 	insert(dst_key, get(dst_key) + pkthdr->len);
 
-	printf("src->total: %d -> %d\n", src_key, get(src_key));
-	printf("dst->total: %d -> %d\n", dst_key, get(dst_key));
+	dprintf(out_filedes, "src->total: %d -> %d\n", src_key, get(src_key));
+	dprintf(out_filedes, "dst->total: %d -> %d\n", dst_key, get(dst_key));
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
 	if (difftime(time(NULL), prev) >= 1) {
-		printf("ONE SECOND INTERVAL - DOING WLAK\n");
+		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
 		prev = time(NULL);
 		pthread_mutex_lock(&m);
 		walk();
 		pthread_mutex_unlock(&m);
 	}
 
-	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
-    printf("Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
-    printf("Payload:\n");                     /* And now the data */
+	dprintf(out_filedes, "Packet Count: %d\n", ++count);    /* Number of Packets */
+    dprintf(out_filedes, "Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
+    dprintf(out_filedes, "Payload:\n");                     /* And now the data */
 	
 	for(i=0;i<pkthdr->len;i++) { 
         float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
 		if(isprint(packet[i]))                /* Check if the packet data is printable */
-            printf("%c",packet[i]);          /* Print it */
+            dprintf(out_filedes, "%c",packet[i]);          /* Print it */
         else
-            printf(".");          /* If not print a . */
+            dprintf(out_filedes, ".");          /* If not print a . */
         if((i%16==0 && i!=0) || i==pkthdr->len-1) 
-            printf("\n"); 
+            dprintf(out_filedes, "\n"); 
 		resetColors();
     }
-    printf("\n\n");
+    dprintf(out_filedes, "\n\n");
 }
 
 
 void send_exit_signal(int signal) {
-	printf("Sending Exit Signal...\n");
+	dprintf(out_filedes, "Sending Exit Signal...\n");
 	pcap_breakloop(handle);
 }
 
@@ -252,14 +253,16 @@ void* startup(void* options_raw) {
 	curr.key = i - 1;
 	curr.freq = 0.0;
 	datapoints[i] = curr;
-
-	printf("key, freq: %d, %f\n", curr.key, curr.freq);
+  
+	dprintf(out_filedes, "key, freq: %d, %f\n", curr.key, curr.freq);
   }
 	
   long options = (long) options_raw;
   if (options == 1) {
     int devnull = open("/dev/null", O_WRONLY);
-    dup2(devnull, 1);
+    out_filedes = devnull;
+  } else {
+    out_filedes = 1;
   }
   
   prev = time(NULL);
@@ -270,7 +273,7 @@ void* startup(void* options_raw) {
     charData.num_chars[i] = 0;
   }
   
-  printf("Loading history... \n"); //TODO implement
+  dprintf(out_filedes, "Loading history... \n"); //TODO implement
   loadHistory(NULL);
   
   char error_buffer[PCAP_ERRBUF_SIZE];
@@ -286,28 +289,28 @@ void* startup(void* options_raw) {
   signal(SIGINT, send_exit_signal);
   
   if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
-    printf("Could not get information for device: %s\n", dev);
+    dprintf(out_filedes, "Could not get information for device: %s\n", dev);
     ip = 0;
     subnet_mask = 0;
   }
   handle = pcap_open_live(dev, BUFSIZ, 1, 1000, error_buffer);
   if (handle == NULL) {
-    printf("Could not open %s - %s\n", dev, error_buffer);
+    dprintf(out_filedes, "Could not open %s - %s\n", dev, error_buffer);
     return NULL;
   }
   if (pcap_compile(handle, &filter, filter_exp, 0, ip) == -1) {
-    printf("Bad filter - %s\n", pcap_geterr(handle));
+    dprintf(out_filedes, "Bad filter - %s\n", pcap_geterr(handle));
     return NULL;
   }
   if (pcap_setfilter(handle, &filter) == -1) {
-    printf("Error setting filter - %s\n", pcap_geterr(handle));
+    dprintf(out_filedes, "Error setting filter - %s\n", pcap_geterr(handle));
     return NULL;
   }
   
   pcap_loop(handle, 0, pcap_callback, NULL);
   pcap_close(handle);
   
-  printf("Saving history...\n"); //TODO implement
+  dprintf(out_filedes, "Saving history...\n"); //TODO implement
   saveHistory(NULL);
   return NULL;
 }

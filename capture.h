@@ -1,8 +1,11 @@
 #include <pcap.h>
+#include <stdio.h>
+
 #define NUM_BYTES_PREDICTED 1024
 #define RESIZE_THRESHOLD UINT_MAX
 
 #define NUM_KEYS 7
+
 
 
 /**

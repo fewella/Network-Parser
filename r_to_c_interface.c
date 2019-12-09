@@ -79,7 +79,13 @@ SEXP getSecondData() {
 	}
 	
 	second_unit* unit = &head[itr_idx];
+	pthread_mutex_lock(&m);
 	memcpy(unit->points, datapoints, sizeof(point) * NUM_KEYS);
+	printf("Hello World!\n");
+	for (i = 0; i < NUM_KEYS; ++i) {
+	  printf("point %d: %f\n", i, datapoints[i].freq);
+	}
+	pthread_mutex_unlock(&m);
 	itr_idx++;
 	if (start_idx == itr_idx) ++start_idx;
 	
