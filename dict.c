@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "dict.h"
 #include "capture.h"
@@ -56,16 +57,22 @@ int get(int k) {
 
 void walk() {
 	int i;
+	pthread_mutex_lock(&m);
 	for (i = 0; i < NUM_KEYS; i++) {
 		point curr = datapoints[i];
 		curr.freq = get(i - 1);
 		printf("key, freq: %d, %f\n", curr.key, curr.freq);
 	}
+	pthread_mutex_unlock(&m);
 }
 
 void clear() {
 	int i;
+	pthread_mutex_lock(&m);
 	for (i = 0; i < NUM_KEYS; i++) {
 		datapoints[i].freq = 0;
 	}
+	pthread_mutex_unlock(&m);
 }
+
+

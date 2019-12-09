@@ -27,5 +27,12 @@ int get(int k);
 /**
  * Goes through each node in the dict, makes a struct for each node (key->freq), and puts into array
  * Should also communicate with rshiny
+ * IS THREAD SAFE
  */
 void walk();
+
+/**
+ * Clears frequency of datapoints -  should be called after RShiny plots
+ * IS THREAD SAFE
+ */
+void clear();

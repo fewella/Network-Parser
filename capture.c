@@ -214,9 +214,7 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	if (difftime(time(NULL), prev) >= 1) {
 		printf("ONE SECOND INTERVAL - DOING WLAK\n");
 		prev = time(NULL);
-		pthread_mutex_lock(&m);
 		walk();
-		pthread_mutex_unlock(&m);
 	}
 
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
