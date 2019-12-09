@@ -8,7 +8,7 @@ OBJ_DIR=.obj
 OBJ_FILES=capture.o history.o dict.o
 OBJ_FILES_EXT= $(OBJ_FILES) r_to_c_interface.o
 
-LIBS=-lpcap -lpthread
+LIBS=-lpcap -lpthread -Iinclude
 INT_LIBS = -lpthread
 
 .PHONY: all library interface
@@ -32,13 +32,6 @@ capturemake: capture.o history.o dict.o
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) -c $^ -o $@
-
-
-history.o: history.c
-	$(CC) -c $^ -o $(OBJ_DIR)$@
-
-dict.o: dict.c
-	$(CC) -c $^ -o $(OBJ_DIR)$@
 
 
 $(OBJ_DIR):
