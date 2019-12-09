@@ -55,16 +55,17 @@ int get(int k) {
 }
 
 void walk() {
-	printf("walking\n");
 	int i;
-	for (i = -1; i < NUM_KEYS - 1; i++) {
-		// TODO: sent to rshiny
-		point curr;
-		curr.key = i;
-		curr.freq = get(i);
+	for (i = 0; i < NUM_KEYS; i++) {
+		point curr = datapoints[i];
+		curr.freq = get(i - 1);
 		printf("key, freq: %d, %f\n", curr.key, curr.freq);
-
-		datapoints[i + 1] = curr;
 	}
 }
 
+void clear() {
+	int i;
+	for (i = 0; i < NUM_KEYS; i++) {
+		datapoints[i].freq = 0;
+	}
+}

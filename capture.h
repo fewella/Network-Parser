@@ -1,5 +1,4 @@
 #include <pcap.h>
-
 #define NUM_BYTES_PREDICTED 1024
 #define RESIZE_THRESHOLD UINT_MAX
 
@@ -29,7 +28,7 @@ typedef struct _point {
 
 
 static point datapoints[NUM_KEYS];
-
+pthread_mutex_t m;
 
 struct _idx_info {
 	list_entry* lists[NUM_BYTES_PREDICTED];				/* Stores an array of byte information for NUM_BYTES_PREDICTED bytes */

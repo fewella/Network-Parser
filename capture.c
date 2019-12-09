@@ -212,8 +212,11 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
 	if (difftime(time(NULL), prev) >= 1) {
+		printf("ONE SECOND INTERVAL - DOING WLAK\n");
 		prev = time(NULL);
+		pthread_mutex_lock(&m);
 		walk();
+		pthread_mutex_unlock(&m);
 	}
 
 	printf("Packet Count: %d\n", ++count);    /* Number of Packets */
@@ -241,6 +244,18 @@ void send_exit_signal(int signal) {
 }
 
 void* startup(void* options_raw) {
+  pthread_mutex_init(&m, NULL);
+  
+  int i;
+  for (i = 0; i < NUM_KEYS; i++) {
+	point curr = datapoints[i];
+	curr.key = i - 1;
+	curr.freq = 0.0;
+	datapoints[i] = curr;
+
+	printf("key, freq: %d, %f\n", curr.key, curr.freq);
+  }
+	
   long options = (long) options_raw;
   if (options == 1) {
     int devnull = open("/dev/null", O_WRONLY);
@@ -249,7 +264,6 @@ void* startup(void* options_raw) {
   
   prev = time(NULL);
   
-  int i;
   for(i = 0; i < NUM_BYTES_PREDICTED; ++i) {
     charData.lists[i] = NULL;
     charData.total_chars_counted[i] = 0;
