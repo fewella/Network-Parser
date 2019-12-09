@@ -63,7 +63,7 @@ static int start_idx = 0;
 static int itr_idx = 0;
 
 SEXP getSecondData() {
-	SEXP columns[NUM_KEYS];
+  SEXP columns[NUM_KEYS];
   int i;
   for (i = 0; i < NUM_KEYS; ++i) {
     columns[i] = PROTECT(allocVector(REALSXP, 60));
@@ -71,6 +71,7 @@ SEXP getSecondData() {
   double* dbls[NUM_KEYS];
   for (i = 0; i < NUM_KEYS; ++i) {
     dbls[i] = REAL(columns[i]);
+    memset(dbls[i], 0, sizeof(double) * 60);
   }
 	
 	if (head == NULL) {
@@ -91,21 +92,22 @@ SEXP getSecondData() {
     }
 	}
 	
-	SEXP ans = PROTECT(allocVector(VECSXP, 5)),
-	     nms = PROTECT(allocVector(STRSXP, 5)),
+	SEXP ans = PROTECT(allocVector(VECSXP, NUM_KEYS)),
+	     nms = PROTECT(allocVector(STRSXP, NUM_KEYS)),
 	     rnms = PROTECT(allocVector(INTSXP, 2));
 	
-	SET_STRING_ELT(nms, 0, mkChar("myColumn1"));
-	SET_STRING_ELT(nms, 1, mkChar("myColumn2"));
-	SET_STRING_ELT(nms, 2, mkChar("myColumn3"));
-	SET_STRING_ELT(nms, 3, mkChar("myColumn4"));
-	SET_STRING_ELT(nms, 4, mkChar("myColumn5"));
-	
-	for (i = 0; i < 5; ++i) {
+	char base_name[10] = "myColumn";
+	base_name[9] = '\0';
+	for (i = 0; i < NUM_KEYS; ++i) {
+	  base_name[8] = i + '1';
+	  SET_STRING_ELT(nms, i, mkChar(base_name));
+	}
+
+	for (i = 0; i < NUM_KEYS; ++i) {
 	  SET_VECTOR_ELT(ans, i, columns[i]);
 	}
 	
-	INTEGER(rnms)[0] = NA_INTEGER;
+	INTEGER(rnms)[0] = NA_REAL;
 	INTEGER(rnms)[1] = -60;
 	
 	setAttrib(ans, R_ClassSymbol, ScalarString(mkChar("data.frame")));
