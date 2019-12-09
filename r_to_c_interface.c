@@ -83,8 +83,7 @@ SEXP getSecondData() {
 	itr_idx++;
 	if (start_idx == itr_idx) ++start_idx;
 	
-	i = start_idx;
-	for (i = 0; i != itr_idx; i = (i + 1) % 60) {
+	for (i = start_idx; i != itr_idx; i = (i + 1) % 60) {
 	  point* points = (&head[i])->points;
 	  int j;
     for (j = 0; j < NUM_KEYS; ++j) {
