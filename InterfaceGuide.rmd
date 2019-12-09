@@ -1,6 +1,8 @@
 ---
-title: "R to C: The Comprehensive Guide"
-output: html_document
+title: 'R to C: The Comprehensive Guide'
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -42,7 +44,7 @@ dyn.load("interface.so")
 #### 4) In order to use capture.c, we should follow these steps:
 
 ```{r eval=FALSE}
-# This will startup capture.c, which will reroute standard out to /dev/null. This ensures # that our terminal will only be printing output from R functions, and not the Rapid-fire # chatter of packets.
+# This will startup capture.c, which will reroute standard out to /dev/null. This ensures that our terminal will only be printing output from R functions, and not the Rapid-fire chatter of packets.
 .Call("startSession")
 
 # Use this to end the session of capture.c, which will stop the thread running in the backround. A successful halt will return 0. Non-successful halts will return a non-zero number.
