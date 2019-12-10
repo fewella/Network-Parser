@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "capture.h"
+#include "dict.h"
 
 pthread_t session_thread;
 extern point datapoints[NUM_KEYS];
@@ -82,12 +83,9 @@ SEXP getSecondData() {
 	second_unit* unit = &head[itr_idx];
 	pthread_mutex_lock(&m);
 	memcpy(unit->points, datapoints, sizeof(point) * NUM_KEYS);
-	printf("Hello World!\n");
-	printf("datapoints addr: %p\n", datapoints);
-	for (i = 0; i < NUM_KEYS; ++i) {
-	  printf("point %d: %f\n", i, datapoints[i].freq);
-	}
 	pthread_mutex_unlock(&m);
+	// now we're done copying, we can clear the datapoints
+	clear();
 	itr_idx++;
 	if (start_idx == itr_idx) ++start_idx;
 	

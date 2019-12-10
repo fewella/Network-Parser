@@ -244,7 +244,6 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 void send_exit_signal(int signal) {
 	dprintf(out_filedes, "Sending Exit Signal...\n");
 	pcap_breakloop(handle);
-	free(datapoints);
 }
 
 void* startup(void* options_raw) {
@@ -274,8 +273,8 @@ void* startup(void* options_raw) {
     charData.num_chars[i] = 0;
   }
   
-  dprintf(out_filedes, "Loading history... \n"); //TODO implement
-  // loadHistory(NULL);
+  dprintf(out_filedes, "Loading history... \n");
+  loadHistory(NULL);
   
   char error_buffer[PCAP_ERRBUF_SIZE];
   char *dev = "en0";
@@ -290,7 +289,7 @@ void* startup(void* options_raw) {
   bpf_u_int32 subnet_mask, ip;
   printf("2\n");
   
-  //dsignal(SIGINT, send_exit_signal);
+  //signal(SIGINT, send_exit_signal);
   
   if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
     dprintf(out_filedes, "Could not get information for device: %s\n", dev);

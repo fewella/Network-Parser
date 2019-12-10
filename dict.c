@@ -9,6 +9,8 @@
 #include "dict.h"
 #include "capture.h"
 
+extern point datapints[NUM_KEYS];
+
 typedef struct int_to_int_node {
 	int key;
 	int value;
