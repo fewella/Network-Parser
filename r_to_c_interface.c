@@ -12,7 +12,7 @@
 pthread_t session_thread;
 
 SEXP startSession() {
-  pthread_create(&session_thread, NULL, startup, (void*) 1);
+  pthread_create(&session_thread, NULL, startup, (void*) 0);
   return R_NilValue;
 }
 

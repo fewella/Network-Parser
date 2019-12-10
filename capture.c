@@ -182,6 +182,7 @@ float run_char_analysis(int c, int idx) {
 void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
         const u_char* packet) 
 { 
+
 	unsigned size = 128;
 
     int i=0; 
@@ -212,7 +213,11 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	dprintf(out_filedes, "dst->total: %d -> %d\n", dst_key, get(dst_key));
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
-	if (difftime(time(NULL), prev) >= 1) {
+	double diff = time(NULL) - prev;
+	printf("DIFFTIME: %f\n", diff);
+	printf("time: %d\n", time(NULL));
+	if (diff >= 1) {
+	  printf("reset prev\n");
 		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
 		prev = time(NULL);
 		walk();
@@ -222,17 +227,19 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
     dprintf(out_filedes, "Recieved Packet Size: %d\n", pkthdr->len);    /* Length of header */
     dprintf(out_filedes, "Payload:\n");                     /* And now the data */
 	
+	/*
 	for(i=0;i<pkthdr->len;i++) { 
         float value = run_char_analysis(packet[i], (int) i);
 		setColor(value);
-		if(isprint(packet[i]))                /* Check if the packet data is printable */
-            dprintf(out_filedes, "%c",packet[i]);          /* Print it */
+		if(isprint(packet[i]))                // Check if the packet data is printable 
+            dprintf(out_filedes, "%c",packet[i]);          // Print it 
         else
-            dprintf(out_filedes, ".");          /* If not print a . */
+            dprintf(out_filedes, ".");          // If not print a . 
         if((i%16==0 && i!=0) || i==pkthdr->len-1) 
             dprintf(out_filedes, "\n"); 
 		resetColors();
     }
+*/
     dprintf(out_filedes, "\n\n");
 }
 
@@ -243,6 +250,7 @@ void send_exit_signal(int signal) {
 }
 
 void* startup(void* options_raw) {
+  printf("STARTUP\n");
   pthread_mutex_init(&m, NULL);
   
   int i;
@@ -272,7 +280,7 @@ void* startup(void* options_raw) {
   }
   
   dprintf(out_filedes, "Loading history... \n"); //TODO implement
-  loadHistory(NULL);
+  // loadHistory(NULL);
   
   char error_buffer[PCAP_ERRBUF_SIZE];
   char *dev = "en0";
@@ -281,10 +289,13 @@ void* startup(void* options_raw) {
   int timeout = 100000;
   struct bpf_program filter;
   
+  printf("1\n");
+  
   char filter_exp[] = "";
   bpf_u_int32 subnet_mask, ip;
+  printf("2\n");
   
-  signal(SIGINT, send_exit_signal);
+  //dsignal(SIGINT, send_exit_signal);
   
   if (pcap_lookupnet(dev, &ip, &subnet_mask, error_buffer) == -1) {
     dprintf(out_filedes, "Could not get information for device: %s\n", dev);
@@ -304,7 +315,8 @@ void* startup(void* options_raw) {
     dprintf(out_filedes, "Error setting filter - %s\n", pcap_geterr(handle));
     return NULL;
   }
-  
+  printf("3\n");
+  printf("about to call callback\n");
   pcap_loop(handle, 0, pcap_callback, NULL);
   pcap_close(handle);
   

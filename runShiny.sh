@@ -1,1 +1,1 @@
-R -e "shiny::runApp('./Viewer')"
+sudo R -e "shiny::runApp('./Viewer')"
