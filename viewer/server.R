@@ -10,7 +10,6 @@
 var_n = 5
 
 library(shiny)
-library(ggplot2)
 library(reshape2)
 
 dyn.load("../interface.so")
