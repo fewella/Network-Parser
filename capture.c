@@ -182,7 +182,6 @@ float run_char_analysis(int c, int idx) {
 void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr, 
         const u_char* packet) 
 { 
-
 	unsigned size = 128;
 
     int i=0; 
@@ -214,12 +213,10 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
 	double diff = time(NULL) - prev;
-	printf("DIFFTIME: %f\n", diff);
-	printf("time: %d\n", time(NULL));
 	if (diff >= 1) {
-	  printf("reset prev\n");
-		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
+	    printf("reset prev\n");
 		prev = time(NULL);
+		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
 		walk();
 	}
 
@@ -247,20 +244,18 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 void send_exit_signal(int signal) {
 	dprintf(out_filedes, "Sending Exit Signal...\n");
 	pcap_breakloop(handle);
+	free(datapoints);
 }
 
 void* startup(void* options_raw) {
-  printf("STARTUP\n");
   pthread_mutex_init(&m, NULL);
   
   int i;
   for (i = 0; i < NUM_KEYS; i++) {
-	point curr = datapoints[i];
-	curr.key = i - 1;
-	curr.freq = 0.0;
-	datapoints[i] = curr;
+	datapoints[i].key = i - 1;
+	datapoints[i].freq = 0.0;
   
-	dprintf(out_filedes, "key, freq: %d, %f\n", curr.key, curr.freq);
+	dprintf(out_filedes, "key, freq: %d, %f\n", datapoints[i].key, datapoints[i].freq);
   }
 	
   long options = (long) options_raw;

@@ -58,8 +58,10 @@ int get(int k) {
 void walk() {
 	int i;
 	pthread_mutex_lock(&m);
-	printf("WALKING");
+	printf("WALKING, datapoints addr: %p\n", datapoints);
 	for (i = 0; i < NUM_KEYS; i++) {
+		printf("i-1: %d\n", i-1);
+		datapoints[i].key  = i - 1;
 		datapoints[i].freq = get(i - 1);
 		printf("key, freq: %d, %f\n", datapoints[i].key, datapoints[i].freq);
 	}

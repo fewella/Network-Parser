@@ -10,6 +10,7 @@
 #include "capture.h"
 
 pthread_t session_thread;
+extern point datapoints[NUM_KEYS];
 
 SEXP startSession() {
   pthread_create(&session_thread, NULL, startup, (void*) 0);
@@ -82,6 +83,7 @@ SEXP getSecondData() {
 	pthread_mutex_lock(&m);
 	memcpy(unit->points, datapoints, sizeof(point) * NUM_KEYS);
 	printf("Hello World!\n");
+	printf("datapoints addr: %p\n", datapoints);
 	for (i = 0; i < NUM_KEYS; ++i) {
 	  printf("point %d: %f\n", i, datapoints[i].freq);
 	}
