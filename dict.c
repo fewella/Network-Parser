@@ -9,7 +9,7 @@
 #include "dict.h"
 #include "capture.h"
 
-extern point datapints[NUM_KEYS];
+extern point datapoints[NUM_KEYS];
 
 typedef struct int_to_int_node {
 	int key;
@@ -71,10 +71,11 @@ void walk() {
 }
 
 void clear() {
+	printf("CLEARING!\n");
 	int i;
 	pthread_mutex_lock(&m);
 	for (i = 0; i < NUM_KEYS; i++) {
-		datapoints[i].freq = 0;
+		insert(i - 1, 0);
 	}
 	pthread_mutex_unlock(&m);
 }
