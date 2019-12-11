@@ -214,7 +214,6 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
 	double diff = time(NULL) - prev;
 	if (diff >= 1) {
-	    printf("reset prev\n");
 		prev = time(NULL);
 		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
 		walk();
