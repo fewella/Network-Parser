@@ -19,6 +19,7 @@
 #include <netdb.h>
 #include <time.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "history.h"
 #include "capture.h"
@@ -262,7 +263,7 @@ void* startup(void* options_raw) {
     int devnull = open("/dev/null", O_WRONLY);
     out_filedes = devnull;
   } else {
-    out_filedes = 1;
+    out_filedes = STDOUT_FILENO;
   }
   
   prev = time(NULL);
