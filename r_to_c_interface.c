@@ -14,7 +14,7 @@ pthread_t session_thread;
 extern point datapoints[NUM_KEYS];
 
 SEXP startSession() {
-  pthread_create(&session_thread, NULL, startup, (void*) 0);
+  pthread_create(&session_thread, NULL, startup, (void*) 1);
   return R_NilValue;
 }
 
@@ -89,12 +89,14 @@ SEXP getSecondData() {
 	itr_idx++;
 	if (start_idx == itr_idx) ++start_idx;
 	
+	int k = 0;
 	for (i = start_idx; i != itr_idx; i = (i + 1) % 60) {
 	  point* points = (&head[i])->points;
 	  int j;
     for (j = 0; j < NUM_KEYS; ++j) {
-      dbls[j][i] = points[j].freq;
+      dbls[j][k] = points[j].freq;
     }
+    ++k;
 	}
 	
 	SEXP ans = PROTECT(allocVector(VECSXP, NUM_KEYS)),

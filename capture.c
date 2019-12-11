@@ -214,7 +214,7 @@ void pcap_callback(u_char *arg, const struct pcap_pkthdr* pkthdr,
 	// check for 1 second interval. if so, make a struct for each entry in the dictionary and give to Rshiny
 	double diff = time(NULL) - prev;
 	if (diff >= 1) {
-	    printf("reset prev\n");
+	    dprintf(out_filedes, "reset prev\n");
 		prev = time(NULL);
 		dprintf(out_filedes, "ONE SECOND INTERVAL - DOING WLAK\n");
 		walk();
@@ -282,12 +282,10 @@ void* startup(void* options_raw) {
   int promiscuous = 1;
   int timeout = 100000;
   struct bpf_program filter;
-  
-  printf("1\n");
+
   
   char filter_exp[] = "";
   bpf_u_int32 subnet_mask, ip;
-  printf("2\n");
   
   //signal(SIGINT, send_exit_signal);
   
@@ -309,8 +307,8 @@ void* startup(void* options_raw) {
     dprintf(out_filedes, "Error setting filter - %s\n", pcap_geterr(handle));
     return NULL;
   }
-  printf("3\n");
-  printf("about to call callback\n");
+
+  dprintf(out_filedes, "about to call callback\n");
   pcap_loop(handle, 0, pcap_callback, NULL);
   pcap_close(handle);
   
