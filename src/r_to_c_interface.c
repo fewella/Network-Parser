@@ -6,6 +6,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "capture.h"
 #include "dict.h"
@@ -14,13 +15,15 @@ pthread_t session_thread;
 extern point datapoints[NUM_KEYS];
 
 SEXP startSession() {
-  pthread_create(&session_thread, NULL, startup, (void*) 0);
+  pthread_create(&session_thread, NULL, startup, (void*) 1);
   return R_NilValue;
 }
 
 SEXP endSession() {
   SEXP out = PROTECT(allocVector(INTSXP, 1));
   int* val = INTEGER(out);
+  //raise(SIGINT);
+  //*val = pthread_join(session_thread, NULL);
   *val = pthread_cancel(session_thread);
   pthread_join(session_thread, NULL);
   UNPROTECT(1);
@@ -65,6 +68,11 @@ static int start_idx = 0;
 static int itr_idx = 0;
 
 SEXP getSecondData() {
+  
+  if (head == NULL) {
+    head = malloc(sizeof(second_unit) * 60);
+  }
+  
   SEXP columns[NUM_KEYS];
   int i;
   for (i = 0; i < NUM_KEYS; ++i) {
@@ -76,9 +84,6 @@ SEXP getSecondData() {
     memset(dbls[i], 0, sizeof(double) * 60);
   }
 	
-	if (head == NULL) {
-	  head = malloc(sizeof(second_unit) * 60);
-	}
 	
 	second_unit* unit = &head[itr_idx];
 	pthread_mutex_lock(&m);
@@ -86,15 +91,19 @@ SEXP getSecondData() {
 	pthread_mutex_unlock(&m);
 	// now we're done copying, we can clear the datapoints
 	clear();
-	itr_idx++;
-	if (start_idx == itr_idx) ++start_idx;
+	itr_idx = (itr_idx + 1) % 60;
+	if (start_idx == itr_idx) {
+	  start_idx = (start_idx + 1) % 60;
+	}
 	
+	int k = 0;
 	for (i = start_idx; i != itr_idx; i = (i + 1) % 60) {
 	  point* points = (&head[i])->points;
 	  int j;
     for (j = 0; j < NUM_KEYS; ++j) {
-      dbls[j][i] = points[j].freq;
+      dbls[j][k] = points[j].freq;
     }
+    ++k;
 	}
 	
 	SEXP ans = PROTECT(allocVector(VECSXP, NUM_KEYS)),
