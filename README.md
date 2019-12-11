@@ -19,6 +19,7 @@ We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation.
 To run just the packet capture script, only ```libpcap``` is needed:
 
 ```bash
+cd src/
 make && ./capture
 ```
 
