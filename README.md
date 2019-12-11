@@ -10,13 +10,23 @@ When you’re using the Internet, your computer is constantly sending and receiv
 While there are already apps which monitor network traffic, many of them do very little purging on their own, and display everything that the network packets contain, which is not very helpful for determining what data websites might be collecting from your computer. 
 
 ## How
-We used a library called [libpcap](https://github.com/the-tcpdump-group/libpcap) to do most of the packet analysis
+We used a library called [libpcap](https://github.com/the-tcpdump-group/libpcap) to do most of the packet analysis.
 
-We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation
+We used [Rshiny](https://shiny.rstudio.com/) to create the visualisation.
 
 ## How to
+
+To run just the packet capture script, only ```libpcap``` is needed:
+
 ```bash
+cd src/
 make && ./capture
+```
+
+To run the interface, Rshiny is needed as well:
+
+```bash
+make interface && ./runShiny.sh
 ```
 
 ## Future Additions
