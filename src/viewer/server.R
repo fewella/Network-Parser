@@ -52,7 +52,7 @@ shinyServer(function(input, output) {
     df = melt(df, id.vars = 'time', variable.name = 'source')
     
     par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-    plot(df$time, df$value, col=df$source, xlab = "Time", ylab = "Ln Frequency (bytes/second)", pch = 23, cex = 1.5)
+    plot(df$time, df$value, col=df$source, xlab = "Time (seconds)", ylab = "Ln Frequency (bytes/second)", pch = 23, cex = 1.5)
     legend("right", inset=c(-0.17,0), legend = c("(failed lookup)", "google.com", "facebook.com", "amazonaws.com", "googleusercontent.com", "illinois.edu", "github.com"), col=1:length(df$source), pch = 1)
     #ggplot(df, aes(time, value)) + geom_line(aes(color = source))
 
