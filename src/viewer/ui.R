@@ -13,12 +13,7 @@ library(shiny)
 shinyUI(fluidPage(
   headerPanel("Network Parser", "NetParser"),
   tabsetPanel(
-    tabPanel("tab1", verticalLayout(
-      plotOutput("myPlot"),
-      plotOutput("myPlot1"),
-      plotOutput("myPlot12")
-      )),
-    tabPanel("tab2", plotOutput("myPlot2")),
-    tabPanel("tab3", plotOutput("myPlot3"))
-  )
-))
+    tabPanel("Real-Time plot", verticalLayout(
+      plotOutput("myPlot")
+      ))
+)))
