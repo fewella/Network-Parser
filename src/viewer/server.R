@@ -16,7 +16,7 @@ dyn.load("../interface.so")
 
 .Call("startSession")
 onStop(function() {
-  cat("ending Session")
+  cat("ending Session\n")
   .Call("endSession")
 })
 
@@ -28,15 +28,20 @@ shinyServer(function(input, output) {
     df=data.frame(time=1:var_n,y=runif(var_n))
     var_n <<- var_n + 5
     print(var_n)
+    df = log(df)
     return(df)
   })
   
   getRealData = reactive({
     invalidateLater(1000)
-    df <- data.frame(time = 1:60, .Call("getSecondData"))
+    df <- data.frame(.Call("getSecondData"))
     #print(colnames(df))
     #print(df$myColumn4)
     #print(df)
+    if (sum(df) > 0) {
+      df = log(df)
+    }
+    df$time = 1:60
     return(df)
   })
   
@@ -47,7 +52,7 @@ shinyServer(function(input, output) {
     df = melt(df, id.vars = 'time', variable.name = 'source')
     
     par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-    plot(df$time, df$value, col=df$source, xlab = "Time", ylab = "Frequency (bytes/second)")
+    plot(df$time, df$value, col=df$source, xlab = "Time", ylab = "Ln Frequency (bytes/second)", pch = 23, cex = 1.5)
     legend("right", inset=c(-0.17,0), legend = c("(failed lookup)", "google.com", "facebook.com", "amazonaws.com", "googleusercontent.com", "illinois.edu", "github.com"), col=1:length(df$source), pch = 1)
     #ggplot(df, aes(time, value)) + geom_line(aes(color = source))
 
