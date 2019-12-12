@@ -7,7 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
-var_n = 5
+var_n = 1
 
 library(shiny)
 library(reshape2)
@@ -61,7 +61,7 @@ shinyServer(function(input, output) {
   getData1 = reactive({
     invalidateLater(500 * 5)
     df=data.frame(time=1:var_n,y=rnorm(var_n))
-    var_n <<- var_n + 5
+    var_n <<- var_n + 1
     print(var_n)
     return(df)
   })
