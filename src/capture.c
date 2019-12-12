@@ -93,12 +93,26 @@ int get_hostname(char* ip_address) {
 
 	inet_pton(AF_INET, ip_address, &sa.sin_addr);
 	int res = getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, NI_NAMEREQD);
+	
 	if (res != 0) {
-		dprintf(out_filedes, "getnameinfo failed!\n");
-		return -1;
+		
+		if (res == EAI_AGAIN) {
+			int try_again = 1;
+			while (try_again) {
+				int res = getnameinfo((struct sockaddr*)&sa, sizeof(sa), node, sizeof(node), NULL, 0, NI_NAMEREQD);
+			}
+		}
+
+		if (res == EAI_FAIL) {
+			fprintf(stderr, "IP not assigned!\n");
+		}
+
+		if (res == EAI_SYSTEM) {
+			fprintf(stderr, "system failure!\n");
+		}
 	}
 
-	//printf("node: %s\n", node);
+	dprintf(out_filedes, "node: %s\n", node);
 	return resolve_hostname(node);
 }
 
@@ -254,8 +268,6 @@ void* startup(void* options_raw) {
   for (i = 0; i < NUM_KEYS; i++) {
 	datapoints[i].key = i - 1;
 	datapoints[i].freq = 0.0;
-  
-	dprintf(out_filedes, "key, freq: %d, %f\n", datapoints[i].key, datapoints[i].freq);
   }
 	
   long options = (long) options_raw;
