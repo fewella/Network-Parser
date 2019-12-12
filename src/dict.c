@@ -76,6 +76,7 @@ void clear() {
 	pthread_mutex_lock(&m);
 	for (i = 0; i < NUM_KEYS; i++) {
 		insert(i - 1, 0);
+		datapoints[i].freq = 0.0;
 	}
 	pthread_mutex_unlock(&m);
 }
